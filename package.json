@@ -12,4 +12,11 @@
     "@prisma/client": "^5.22.0",
     "prisma": "^5.22.0"
   }
+
+"scripts": {
+  "dev": "next dev",
+  "build": "npx prisma generate && next build",  <-- CHANGE THIS LINE
+  "start": "next start",
+  "lint": "next lint"
+}
 }
