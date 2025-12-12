@@ -1,0 +1,35 @@
+// This connects to your Supabase Postgres instance
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  // Who is booking?
+  userEmail String
+  userName  String?
+
+  // When?
+  startTime DateTime
+  endTime   DateTime  // This determines the price
+
+  // Payment Status
+  status          BookingStatus @default(PENDING)
+  totalPrice      Int           // Stored in cents (e.g. 2000 = 20.00€)
+  stripeSessionId String?       @unique // To link back to Stripe
+}
+
+enum BookingStatus {
+  PENDING   // Reserved for 10 mins, waiting for payment
+  PAID      // Payment confirmed via Webhook
+  FAILED    // Payment failed or timed out
+  CANCELLED
+}
