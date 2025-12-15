@@ -1,0 +1,36 @@
+{
+  "node": {
+    "401a3bc2d6429f50521766f6556ae037b0d4fd3977": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/delete-booking.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteBooking",
+          "filename": "src/app/actions/delete-booking.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "filename": "src/app/actions/delete-booking.ts",
+      "exportedName": "deleteBooking"
+    },
+    "40e558c964b00310a5a13d8d96defbb8470f6960a7": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/create-booking.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createBooking",
+          "filename": "src/app/actions/create-booking.ts"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "filename": "src/app/actions/create-booking.ts",
+      "exportedName": "createBooking"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "a44pqYUmiLUr6ruvmgGFnJbpD0V58tRopZ2QfNeXW8s="
+}

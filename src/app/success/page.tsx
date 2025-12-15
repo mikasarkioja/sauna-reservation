@@ -6,13 +6,13 @@ import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 
 interface SuccessPageProps {
-  searchParams: {
+  searchParams: Promise<{
     session_id?: string;
-  };
+  }>;
 }
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
-  const { session_id } = searchParams;
+  const { session_id } = await searchParams;
 
   if (!session_id) {
     return (
@@ -155,4 +155,5 @@ function ErrorState({ title, message }: { title: string, message: string }) {
     </main>
   );
 }
+
 

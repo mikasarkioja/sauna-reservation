@@ -49,3 +49,4 @@ export function calculateSaunaPrice(start: Date, end: Date): number {
   return priceCents;
 }
 
+

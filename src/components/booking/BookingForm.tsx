@@ -1,5 +1,8 @@
 'use client';
 
+// Fix: Import 'createBooking' but rename it to 'createSaunaCheckout' 
+// so the rest of your component works without changes.
+import { createBooking as createSaunaCheckout } from '@/app/actions/create-booking';
 import * as React from 'react';
 import { format, addMinutes, isSameDay, startOfToday, parse } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
@@ -129,24 +132,36 @@ export default function BookingForm({ blockedDates = [] }: BookingFormProps) {
 
   const handleSubmit = async () => {
     if (!selectedDate || !startTime) return;
-    
+
     setIsSubmitting(true);
-    
-    // Construct real Date objects for the backend
-    const startDateTime = parse(startTime, 'HH:mm', selectedDate);
-    const endDateTime = addMinutes(startDateTime, durationMinutes);
 
-    // TODO: Call the Server Action
-    console.log('Reserving:', {
-      start: startDateTime,
-      end: endDateTime,
-      price: totalPrice
-    });
+    try {
+      // 1. Calculate the start and end Date objects
+      // "startTime" is a string like "14:30", we need to combine it with "selectedDate"
+      const startDateTime = parse(startTime, 'HH:mm', selectedDate);
+      const endDateTime = addMinutes(startDateTime, durationMinutes);
 
-    // Simulate delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    alert('Booking Initiated! (Check console)');
+      // 2. Call the Server Action (This runs on the server, creates DB record, and talks to Stripe)
+      // We assume you have a hardcoded user email for now, or you can add an input field for it
+      const result = await createSaunaCheckout({
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
+        userEmail: "test-user@example.com"
+      });
+
+      // 3. If we get a URL back, that means Stripe is ready. Go there!
+      if (result?.url) {
+        window.location.href = result.url;
+      } else {
+        alert("Something went wrong. No payment URL returned.");
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create reservation. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // --- Render ---

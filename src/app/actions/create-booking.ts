@@ -41,6 +41,8 @@ export async function createBooking(data: CreateBookingRequest): Promise<CreateB
     const end = new Date(data.endTime);
     const { userEmail, userName } = data;
 
+    console.log('DEBUG: NEXT_PUBLIC_APP_URL is:', process.env.NEXT_PUBLIC_APP_URL); // Debug log
+
     // 1. Basic Validation
     if (!userEmail) {
       throw new Error('User email is required.');
@@ -104,6 +106,11 @@ export async function createBooking(data: CreateBookingRequest): Promise<CreateB
     // 3. Create Stripe Checkout Session
     // We do this AFTER creating the booking record so we have the ID.
     // If Stripe fails, the PENDING booking will eventually need to be cleaned up (e.g. cron job or webhook expiry).
+    
+    // Fallback to localhost if env var is missing (helpful for dev)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    console.log('Using App URL:', appUrl);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -120,8 +127,8 @@ export async function createBooking(data: CreateBookingRequest): Promise<CreateB
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cancel`,
+      success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/cancel`,
       metadata: {
         bookingId: booking.id, // Critical: Link Stripe session to our Booking
       },

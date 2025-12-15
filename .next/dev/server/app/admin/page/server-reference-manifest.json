@@ -1,0 +1,20 @@
+{
+  "node": {
+    "401a3bc2d6429f50521766f6556ae037b0d4fd3977": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/delete-booking.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteBooking",
+          "filename": "src/app/actions/delete-booking.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "exportedName": "deleteBooking",
+      "filename": "src/app/actions/delete-booking.ts"
+    }
+  },
+  "edge": {}
+}

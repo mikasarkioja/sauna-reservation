@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    /* Changed from stone-50 to orange-50 for a warmer wood vibe */
+    @apply bg-orange-50 text-stone-800;
+  }
+}
