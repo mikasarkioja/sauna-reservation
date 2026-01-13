@@ -57,12 +57,15 @@ model FinancialScenario {
 // NEW: Investment Grade Analysis
 model HousingCompany {
   id              String           @id @default(cuid())
+  businessId      String           @unique // e.g. "1234567-8"
   name            String
   constructionYear Int
   apartmentCount  Int
   totalAreaM2     Float
   
-  investmentGrades InvestmentGrade[]
+  investmentGrades  InvestmentGrade[]
+  renovationProjects RenovationProject[]
+  
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -83,10 +86,58 @@ model InvestmentGrade {
   updatedAt        DateTime       @updatedAt
 }
 
+// NEW: Renovation & Documentation
+model RenovationProject {
+  id               String         @id @default(cuid())
+  housingCompanyId String
+  housingCompany   HousingCompany @relation(fields: [housingCompanyId], references: [id])
+  
+  name             String
+  description      String?
+  estimatedCost    Float
+  startYear        Int
+  
+  type             ProjectType    @default(TRADITIONAL)
+  
+  documents        Document[]
+  loanApplications LoanApplication[]
+  
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+enum ProjectType {
+  TRADITIONAL
+  ENERGY_EFFICIENCY
+}
+
+model Document {
+  id                  String            @id @default(cuid())
+  renovationProjectId String
+  renovationProject   RenovationProject @relation(fields: [renovationProjectId], references: [id])
+  
+  title               String // e.g. "Yhtiökokouksen pöytäkirja"
+  type                DocumentType
+  url                 String // Storage URL
+  isSigned            Boolean @default(false)
+  
+  uploadedAt          DateTime @default(now())
+}
+
+enum DocumentType {
+  MEETING_MINUTES
+  TECHNICAL_PLAN
+  BUDGET
+  OTHER
+}
+
 // NEW: Bank Loan Bridge
 model LoanApplication {
   id              String        @id @default(cuid())
-  projectId       String        // Links to a specific renovation project
+  
+  projectId       String        
+  project         RenovationProject @relation(fields: [projectId], references: [id])
+  
   bankName        String        // e.g. "Nordea", "OP", "Danske Bank"
   amountRequested Float
   

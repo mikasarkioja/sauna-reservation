@@ -1,5 +1,7 @@
 import { generateIGScore, IGResult } from './investment-logic';
+import { syncBuildingData, verifyShareCount } from './mml-sync';
 
+// Types aligning with Prisma models (but decoupled for this logic module)
 export interface LoanPacket {
   applicationId: string;
   projectId: string;
@@ -8,6 +10,7 @@ export interface LoanPacket {
     businessId: string;
     name: string;
     shareCount: number;
+    officialRegistryVerified: boolean;
   };
   financialHealth: IGResult;
   boardMinutesSigned: boolean;
@@ -23,11 +26,11 @@ export interface BankOffer {
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
-// Mock Database State for Simulation
-const MOCK_COMPANY_DETAILS = {
-  businessId: '1234567-8',
-  name: 'Asunto Oy Itä-Helsingin Merihiekka',
-  shareCount: 4800, // Using m2 as shares for simplicity
+// Mock Data for "Yhtiökokous" Minutes check
+// In a real app, we'd query prisma.document.findFirst({ where: { renovationProjectId: ..., type: 'MEETING_MINUTES' } })
+const MOCK_DOCUMENT_REGISTRY: Record<string, boolean> = {
+  'proj_1': true, // Has signed minutes
+  'proj_2': true,
 };
 
 /**
@@ -37,24 +40,34 @@ const MOCK_COMPANY_DETAILS = {
 export async function generateLoanPacket(
   projectId: string, 
   amountRequested: number,
-  projectType: 'TRADITIONAL' | 'ENERGY_EFFICIENCY'
+  projectType: 'TRADITIONAL' | 'ENERGY_EFFICIENCY',
+  businessId: string = '1234567-8' // Default for demo
 ): Promise<LoanPacket> {
   
   // 1. Fetch Investment Grade Report (Real-time)
-  // We use our existing logic engine.
   const igReport = generateIGScore('merihiekka-1965', { 
     energyImprovement: projectType === 'ENERGY_EFFICIENCY' 
   });
 
-  // 2. Mock fetching signed minutes
-  const boardMinutesSigned = true; 
+  // 2. MML Sync: Fetch official building data
+  const mmlData = await syncBuildingData(businessId);
+  if (!mmlData) throw new Error("Building not found in MML Registry");
 
-  // 3. Construct Packet
+  // 3. Document Check: Ensure Board Minutes are Signed
+  // We check if the project has a 'MEETING_MINUTES' document that isSigned.
+  const boardMinutesSigned = MOCK_DOCUMENT_REGISTRY[projectId] || false;
+
+  // 4. Construct Packet
   return {
     applicationId: `APP-${Date.now()}`,
     projectId,
     amountRequested,
-    companyDetails: MOCK_COMPANY_DETAILS,
+    companyDetails: {
+        businessId: mmlData.businessId,
+        name: mmlData.name,
+        shareCount: mmlData.totalAreaM2, // Using area as proxy for shares in this demo
+        officialRegistryVerified: true
+    },
     financialHealth: igReport,
     boardMinutesSigned,
     projectType
