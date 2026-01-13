@@ -33,3 +33,79 @@ enum BookingStatus {
   FAILED    // Payment failed or timed out
   CANCELLED
 }
+
+// 1. DATABASE EXTENSION
+model CostBenchmark {
+  id                        String @id @default(cuid())
+  category                  String
+  unitPriceM2               Float
+  expectedLifeYears         Int
+  technicalDepreciationRate Float
+  updatedAt                 DateTime @updatedAt
+}
+
+model FinancialScenario {
+  id                 String @id @default(cuid())
+  title              String
+  totalLoanAmount    Float
+  interestRate       Float
+  termYears          Int
+  monthlyImpactPerM2 Float
+  createdAt          DateTime @default(now())
+}
+
+// NEW: Investment Grade Analysis
+model HousingCompany {
+  id              String           @id @default(cuid())
+  name            String
+  constructionYear Int
+  apartmentCount  Int
+  totalAreaM2     Float
+  
+  investmentGrades InvestmentGrade[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model InvestmentGrade {
+  id               String         @id @default(cuid())
+  
+  housingCompanyId String
+  housingCompany   HousingCompany @relation(fields: [housingCompanyId], references: [id])
+  
+  score            Float          // 0-100
+  grade            String         // A, B, C, D, E
+  
+  // Stores breakdown of Repair Debt, Funding, Energy, Governance
+  // Structure: { repairDebt: number, funding: number, energy: number, governance: number }
+  pillarScores     Json
+  
+  updatedAt        DateTime       @updatedAt
+}
+
+// NEW: Bank Loan Bridge
+model LoanApplication {
+  id              String        @id @default(cuid())
+  projectId       String        // Links to a specific renovation project
+  bankName        String        // e.g. "Nordea", "OP", "Danske Bank"
+  amountRequested Float
+  
+  status          LoanStatus    @default(DRAFT)
+  
+  offerMargin     Float?        // e.g. 0.85 (%)
+  repaymentTerm   Int?          // Years
+  collateralType  String?       // e.g. "Mortgage deeds", "Guarantee"
+  
+  isGreenLoan     Boolean       @default(false)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum LoanStatus {
+  DRAFT
+  SUBMITTED
+  OFFER_RECEIVED
+  REJECTED
+  ACTIVE
+}
